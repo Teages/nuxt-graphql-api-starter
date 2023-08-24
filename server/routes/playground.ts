@@ -57,6 +57,10 @@ export default defineEventHandler(() => `
         GraphQLPlayground.init(document.getElementById('root'), {
           // options as 'endpoint' belong here
           endpoint: '${endpoint}',
+          // add cookie
+          settings: {
+            'request.credentials': 'same-origin'
+          }
         })
       })
     </script>

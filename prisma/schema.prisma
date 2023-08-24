@@ -13,7 +13,25 @@ datasource db {
 }
 
 model User {
-  id    Int     @id @default(autoincrement())
-  email String  @unique
-  name  String?
+  id  Int    @id @default(autoincrement())
+  uid String @unique
+
+  profile Profile?
+  hits    Hit[]
+}
+
+model Profile {
+  id      Int     @id @default(autoincrement())
+  name    String?
+  ownerId Int     @unique
+
+  owner User @relation(fields: [ownerId], references: [id])
+}
+
+model Hit {
+  id      Int      @id @default(autoincrement())
+  date    DateTime @default(now())
+  ownerId Int
+
+  owner User @relation(fields: [ownerId], references: [id])
 }

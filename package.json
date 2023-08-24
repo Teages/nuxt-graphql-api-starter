@@ -21,8 +21,10 @@
   "devDependencies": {
     "@antfu/eslint-config": "^0.40.2",
     "@nuxt/devtools": "latest",
+    "@types/jsonwebtoken": "^9.0.2",
     "@types/node": "^20.4.10",
     "eslint": "^8.47.0",
+    "jsonwebtoken": "^9.0.1",
     "nuxt": "^3.6.5",
     "typescript": "^5.1.6"
   }

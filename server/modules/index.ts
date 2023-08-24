@@ -1,11 +1,17 @@
 import * as path from 'node:path'
 import { makeSchema } from 'nexus'
 
-import User from './user'
+import UserModule from './user'
+import ProfileModule from './profile'
+import HitModule from './hit'
+import { DateScalar } from './utils/date'
 
 export const schema = makeSchema({
   types: [
-    User,
+    UserModule,
+    ProfileModule,
+    HitModule,
+    DateScalar,
   ],
   outputs: {
     // it should be default,
@@ -14,4 +20,10 @@ export const schema = makeSchema({
       ? path.resolve(process.cwd(), './node_modules/@types/nexus-typegen/index.d.ts')
       : false,
   },
+  contextType: process.env.NODE_ENV !== 'production'
+    ? {
+        module: path.resolve(process.cwd(), './server/modules/context.ts'),
+        export: 'Context',
+      }
+    : undefined,
 })

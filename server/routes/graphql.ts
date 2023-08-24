@@ -1,7 +1,13 @@
 import { createHandler } from 'graphql-http/lib/use/http'
 import { schema } from '../modules'
+import { buildContext } from '../modules/context'
 
-const handler = createHandler({ schema })
+const handler = createHandler({
+  schema,
+  context(req, params) {
+    return buildContext(req, params)
+  },
+})
 
 export default defineEventHandler((event) => {
   const req = event.node.req

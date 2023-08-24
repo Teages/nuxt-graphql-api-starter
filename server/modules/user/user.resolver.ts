@@ -1,60 +1,110 @@
-import { inputObjectType, mutationType, nonNull, nullable, queryType, stringArg } from 'nexus'
-import { mutationAddUser, mutationEditUser, mutationRemoveUser, queryAllUsers, queryUser } from './user.service'
+import { extendType, list, nonNull, nullable, stringArg } from 'nexus'
+import { authSigner } from './auth.service'
 
-const Query = queryType({
+const Query = extendType({
+  type: 'Query',
   definition(t) {
-    t.list.field('allUsers', {
-      type: 'User',
-      resolve: () => queryAllUsers(),
+    t.field('users', {
+      type: nonNull(list(nonNull('User'))),
+      resolve: (_src, _args, ctx) => ctx.db.user.findMany({
+        include: {
+          profile: true,
+          hits: true,
+        },
+      }),
     })
 
     t.field('user', {
-      type: 'User',
+      type: nullable('User'),
       args: {
-        email: nonNull(stringArg()),
+        uid: nonNull(stringArg()),
       },
-      resolve: (_, args) => queryUser(args),
+      resolve: (_src, args, ctx) => ctx.db.user.findUnique({
+        where: {
+          uid: args.uid,
+        },
+        include: {
+          profile: true,
+          hits: true,
+        },
+      }),
+    })
+
+    t.field('me', {
+      type: nullable('User'),
+      resolve: (_src, _args, ctx) => ctx.db.user.current(),
     })
   },
 })
 
-const Mutation = mutationType({
+const Mutation = extendType({
+  type: 'Mutation',
   definition(t) {
-    t.field('addUser', {
+    t.field('signIn', {
       type: 'User',
       args: {
-        email: nonNull(stringArg()),
+        uid: nonNull(stringArg()),
+      },
+      resolve: async (_src, args, ctx) => {
+        const ans = await ctx.db.user.findUnique({
+          where: {
+            uid: args.uid,
+          },
+          include: {
+            profile: true,
+            hits: true,
+          },
+        })
+        if (ans) {
+          authSigner.signAndWriteCookie({
+            userUid: ans.uid,
+          }, ctx)
+        }
+        return ans
+      },
+    })
+
+    t.field('signUp', {
+      type: 'User',
+      args: {
+        uid: nonNull(stringArg()),
         name: nullable(stringArg()),
       },
-      resolve: (_, args) => mutationAddUser(args),
-    })
-
-    t.field('removeUser', {
-      type: 'User',
-      args: {
-        email: nonNull(stringArg()),
+      resolve: async (_src, args, ctx) => {
+        const ans = await ctx.db.user.create({
+          data: {
+            uid: args.uid.toLowerCase(),
+            profile: {
+              create: {
+                name: args.name,
+              },
+            },
+          },
+          include: {
+            profile: true,
+            hits: true,
+          },
+        })
+        if (ans) {
+          authSigner.signAndWriteCookie({
+            userUid: ans.uid,
+          }, ctx)
+        }
+        return ans
       },
-      resolve: (_, args) => mutationRemoveUser(args),
     })
 
-    t.field('editUser', {
+    t.field('signOut', {
       type: 'User',
-      args: {
-        email: nonNull(stringArg()),
-        input: nonNull('EditUserInput'),
+      resolve: async (_src, _args, ctx) => {
+        const current = await ctx.db.user.current()
+        authSigner.removeCookie(ctx)
+        return current
       },
-      resolve: (_, args) => mutationEditUser(args),
     })
-  },
-})
-
-const MutationInput = inputObjectType({
-  name: 'EditUserInput',
-  definition(t) {
-    t.nullable.string('name')
   },
 })
 
 export const UserResolver = [
-  Query, Mutation, MutationInput,
+  Query, Mutation,
 ]
