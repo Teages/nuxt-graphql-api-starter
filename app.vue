@@ -1,9 +1,11 @@
 <script setup lang="ts">
-navigateTo('/playground')
+
 </script>
 
 <template>
-  <div>
-    Hello World
+  <div class="p-4">
+    <button class="btn">
+      Hello daisyUI
+    </button>
   </div>
 </template>

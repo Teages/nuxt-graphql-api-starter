@@ -3,5 +3,8 @@
   "rules": {
     "n/prefer-global/process": ["error", "always"],
     "curly": ["error", "all"]
-  }
+  },
+  "ignorePatterns": [
+    "gql"
+  ]
 }

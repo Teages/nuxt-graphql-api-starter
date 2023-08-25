@@ -19,6 +19,9 @@ export const schema = makeSchema({
     typegen: process.env.NODE_ENV !== 'production'
       ? path.resolve(process.cwd(), './node_modules/@types/nexus-typegen/index.d.ts')
       : false,
+    schema: process.env.NODE_ENV !== 'production'
+      ? path.resolve(process.cwd(), './gql/schema.graphql')
+      : false,
   },
   contextType: process.env.NODE_ENV !== 'production'
     ? {
