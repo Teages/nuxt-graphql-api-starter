@@ -9,7 +9,25 @@ module.exports = {
     './*.vue',
   ],
   theme: {
-    extend: {},
+    container: {
+      center: true,
+    },
   },
   plugins: [require('daisyui')],
+  daisyui: {
+    themes: [
+      {
+        light: {
+          ...require('daisyui/src/theming/themes')['[data-theme=light]'],
+        },
+        dark: {
+          ...require('daisyui/src/theming/themes')['[data-theme=dracula]'],
+          primary: '#a5b4fc',
+          secondary: '#d8b4fe',
+          accent: '#ffb86b',
+        },
+      },
+    ],
+    logs: false,
+  },
 }
